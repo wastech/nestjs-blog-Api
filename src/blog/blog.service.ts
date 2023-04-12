@@ -1,32 +1,38 @@
+import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Blog } from './entities//blog.entity';
+import { Blog } from './schemas/blog.schema';
+import { CreateBlogDto } from './dto/create-blog.dto';
 
 @Injectable()
-export class BlogsService {
-  constructor(
-    @InjectModel('Blog') private readonly blogModel: Model<Blog>,
-  ) {}
+export class BlogService {
+  constructor(@InjectModel(Blog.name) private blogModel: Model<Blog>) {}
 
-  async create(blog: Blog): Promise<Blog> {
-    const createdProduct = new this.blogModel(blog);
-    return createdProduct.save();
+  async create(createBlogDto: CreateBlogDto): Promise<Blog> {
+    const createdBlog = new this.blogModel(createBlogDto);
+    return createdBlog.save();
   }
 
   async findAll(): Promise<Blog[]> {
     return this.blogModel.find().exec();
   }
 
-  async findOne(id: string): Promise<Blog> {
-    return this.blogModel.findById(id).exec();
+  async getPostById(postId: string): Promise<Blog> {
+    const post = await this.blogModel.findById(postId).exec();
+    return post;
   }
 
-  async update(id: string, product: Blog): Promise<Blog> {
-    return this.blogModel.findByIdAndUpdate(id, product, { new: true });
+  async updatePostById(postId: string, update: Partial<Blog>): Promise<Blog> {
+    const post = await this.blogModel
+      .findByIdAndUpdate(postId, update, {
+        new: true,
+      })
+      .exec();
+    return post;
   }
 
-  async remove(id: string): Promise<Blog> {
-    return this.blogModel.findByIdAndRemove(id);
+  async deletePostById(postId: string): Promise<Blog> {
+    const deletedPost = await this.blogModel.findByIdAndDelete(postId).exec();
+    return deletedPost;
   }
 }

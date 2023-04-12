@@ -1,36 +1,58 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
-import { BlogsService } from './blog.service';
-import { Blog } from './entities/blog.entity';
+import {
+  Controller,
+  Get,
+  Post,
+  NotFoundException,
+  Body,
+  Param,
+  Put,
+  Delete,
+} from '@nestjs/common';
+import { BlogService } from './blog.service';
+import { Blog } from './schemas/blog.schema';
+import { CreateBlogDto } from './dto/create-blog.dto';
 
 @Controller('blogs')
 export class BlogsController {
-  constructor(private readonly blogsService: BlogsService) {}
+  constructor(private readonly blogService: BlogService) {}
 
   @Post()
-  async create(@Body() blog: Blog): Promise<Blog> {
-    return this.blogsService.create(blog);
+  async create(@Body() blog: CreateBlogDto): Promise<Blog> {
+    return this.blogService.create(blog);
+  }
+
+  @Get()
+  async findAll(): Promise<CreateBlogDto[]> {
+    return this.blogService.findAll();
+  }
+
+  @Get(':id')
+  async getPostById(@Param('id') postId: string): Promise<Blog> {
+    const post = await this.blogService.getPostById(postId);
+    if (!post) {
+      throw new NotFoundException(`Blog post with ID ${postId} not found`);
     }
-    
-    @Get()
-    async findAll(): Promise<Blog[]> {
-    return this.blogsService.findAll();
+    return post;
+  }
+
+  @Put(':id')
+  async updatePostById(
+    @Param('id') postId: string,
+    @Body() update: Partial<Blog>,
+  ): Promise<Blog> {
+    const updatedPost = await this.blogService.updatePostById(postId, update);
+    if (!updatedPost) {
+      throw new NotFoundException(`Blog post with ID ${postId} not found`);
     }
-    
-    @Get(':id')
-    async findOne(@Param('id') id: string): Promise<Blog> {
-    return this.blogsService.findOne(id);
+    return updatedPost;
+  }
+
+  @Delete(':id')
+  async deletePostById(@Param('id') postId: string): Promise<Blog> {
+    const deletedPost = await this.blogService.deletePostById(postId);
+    if (!deletedPost) {
+      throw new NotFoundException(`Blog post with ID ${postId} not found`);
     }
-    
-    @Put(':id')
-    async update(
-    @Param('id') id: string,
-    @Body() blog: Blog,
-    ): Promise<Blog> {
-    return this.blogsService.update(id, blog);
-    }
-    
-    @Delete(':id')
-    async remove(@Param('id') id: string): Promise<Blog> {
-    return this.blogsService.remove(id);
-    }
-    }
+    return deletedPost;
+  }
+}
