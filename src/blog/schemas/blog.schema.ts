@@ -10,6 +10,8 @@ export class Blog {
 
   @Prop()
   description: string;
+  @Prop()
+  imageUrl: string;
 
   @Prop({ default: Date.now })
   createdAt: Date;

@@ -6,9 +6,10 @@ import { BlogModule } from './blog/blog.module';
 import { APP_FILTER } from '@nestjs/core';
 import { AnyExceptionFilter   } from './http-exception.filter';
 import { mongooseConfig } from './database/mongoose.config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [BlogModule, mongooseConfig()],
+  imports: [BlogModule, mongooseConfig(), AuthModule],
   controllers: [AppController],
   providers: [
     AppService,
