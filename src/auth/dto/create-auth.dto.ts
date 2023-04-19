@@ -4,4 +4,6 @@ export class CreateAuthDto {
   readonly password: string;
   readonly id: string;
   readonly timestamps: Date;
+  oldPassword: string;
+  newPassword: string;
 }

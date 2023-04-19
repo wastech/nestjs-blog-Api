@@ -6,7 +6,8 @@ import {
   Body,
   HttpException,
   UseGuards,
-  Patch,
+  Put,
+  Request,
   Param,
   Delete,
 } from '@nestjs/common';
@@ -16,17 +17,25 @@ import { AuthGuard } from '@nestjs/passport';
 import { LoginUserDto } from './dto/login-user.dto';
 import { User, UserDocument } from './entities/auth.entity';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Request as ExpressRequest } from 'express';
+import { Public } from './decorators/public.decorator';
+
+interface CustomRequest extends Request {
+  user?: any;
+}
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('register')
   async register(@Body() createAuthDto: CreateAuthDto) {
     const user = await this.authService.register(createAuthDto);
     return { user };
   }
 
+  @Public()
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto) {
     const token = await this.authService.login(loginUserDto);
@@ -41,28 +50,14 @@ export class AuthController {
   }
 
   @Get('profile')
-  @UseGuards(AuthGuard('jwt'))
-  async getProfile(@Body() user: User) {
-    return user;
+  getProfile(@Request() req) {
+    return req.user;
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
+  @Put(':id')
+  async updateUser(@Param('id') id: string, @Body() UpdateAuthDto: any) {
+    const userId = id;
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+    return this.authService.updateUser(userId, UpdateAuthDto);
   }
 }
