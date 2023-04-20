@@ -3,7 +3,6 @@ export class CreateAuthDto {
   readonly email: string;
   readonly password: string;
   readonly id: string;
+  readonly role: string;
   readonly timestamps: Date;
-  oldPassword: string;
-  newPassword: string;
 }

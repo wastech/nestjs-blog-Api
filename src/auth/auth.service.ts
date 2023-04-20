@@ -1,6 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuthGuard } from '@nestjs/passport';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -9,7 +13,7 @@ import * as jwt from 'jsonwebtoken';
 import { User, UserDocument } from './entities/auth.entity';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { updatePassword } from './dto/password-update-auth.dto';
+import { Role } from './entities/auth.entity';
 
 @Injectable()
 export class AuthService {
@@ -35,13 +39,16 @@ export class AuthService {
     const user = await this.authModel
       .findOne({ email: loginUserDto.email })
       .exec();
+
     if (!user) {
       return null;
     }
+
     const isPasswordValid = await bcrypt.compare(
       loginUserDto.password,
       user.password,
     );
+
     if (!isPasswordValid) {
       return null;
     }
@@ -53,30 +60,100 @@ export class AuthService {
 
   async findById(_id: number): Promise<User> {
     const user = await this.authModel.findById(_id);
-    console.log('this is usesrId', user);
     return user;
   }
 
-  async updateUser(userId: string, UpdateAuthDto: any): Promise<User> {
-    const filterQuery = { _id: userId };
-    const updateQuery = {
-      ...UpdateAuthDto,
-      // exclude the password field from being updated
-      $unset: { password: 1 },
-    };
-    const options = { new: true };
-    const user = await this.authModel.findOneAndUpdate(
-      filterQuery,
-      updateQuery,
-      options,
-    );
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateAuthDto,
+  ): Promise<User> {
+    const allowedUpdates = ['name', 'email']; // fields that can be updated
+    const updates = Object.keys(updateUserDto); // fields sent in the request body
+    const isValidUpdate = updates.every((update) =>
+      allowedUpdates.includes(update),
+    ); // check if all fields are allowed to be updated
 
-    if (!user) {
-      throw new Error('User not found');
+    if (!isValidUpdate) {
+      throw new BadRequestException('Invalid updates!');
     }
 
+    const user = await this.authModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+
+    updates.forEach((update) => {
+      user[update] = updateUserDto[update];
+    });
+
+    await user.save();
+
     return user;
   }
 
- 
+  async findAll(): Promise<User[]> {
+    return this.authModel.find().exec();
+  }
+
+  async updateUserPassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<User> {
+    const user = await this.authModel.findById(userId);
+
+    if (!user) {
+      // throw new Error(`User with id ${userId} not found`);
+      // User does not exist
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+    // Check if the current user is authorized to update the password
+    // Check if the old password matches the user's current password
+    const oldPasswordMatches = await bcrypt.compare(oldPassword, user.password);
+
+    if (!oldPasswordMatches) {
+      // Old password does not match
+      throw new UnauthorizedException('Invalid old password');
+    }
+    if (oldPassword === newPassword) {
+      throw new BadRequestException(
+        'New password cannot be the same as old password',
+      );
+    }
+
+    // Hash the new password using bcrypt and update it in the database
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const updatedUser = await this.authModel.findByIdAndUpdate(
+      userId,
+      { password: hashedNewPassword },
+      { new: true },
+    );
+
+    return updatedUser;
+  }
+
+  async deleteUser(userId: string, userRole: Role): Promise<User> {
+    const user = await this.authModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if user is authorized to delete
+    if (userRole !== Role.Admin && user._id.toString() !== userId) {
+      throw new UnauthorizedException(
+        'You are not authorized to delete this user',
+      );
+    }
+
+    return this.authModel.findByIdAndRemove(userId);
+  }
+
+  async getUser(id: string): Promise<User> {
+    const user = await this.authModel.findById(id).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
 }
