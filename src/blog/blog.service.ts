@@ -22,9 +22,6 @@ export class BlogService {
     return createdBlog.save();
   }
 
-  // async findAll(): Promise<Blog[]> {
-  //   return this.blogModel.find().exec();
-  // }
   async findAll(page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit; // calculate how many posts to skip based on page and limit
     const total = await this.blogModel.countDocuments(); // get the total number of posts
@@ -102,21 +99,20 @@ export class BlogService {
     if (!blog) {
       throw new NotFoundException(`Blog with id ${blogId} not found`);
     }
-    
+
     // Check if the user has already downvoted the post
     if (blog.downvotes.includes(userId)) {
       throw new BadRequestException('User has already downvoted this blog');
     }
-  
+
     // Remove the user's ID from the upvotes array (if it exists)
     blog.upvotes = blog.upvotes.filter((id) => id !== userId);
-  
+
     // Add the user's ID to the downvotes array
     blog.downvotes.push(userId);
-  
+
     return await blog.save();
   }
-
 
   async findByUserId(userId: string): Promise<Blog[]> {
     return this.blogModel.find({ user: userId }).exec();
@@ -125,7 +121,4 @@ export class BlogService {
   async findByCategory(categoryName: string): Promise<Blog[]> {
     return this.blogModel.find({ category: categoryName }).exec();
   }
-
-
-
 }

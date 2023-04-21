@@ -2,7 +2,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import * as uniqueValidator from 'mongoose-unique-validator';
 
-
 export enum Role {
   User = 'user',
   Admin = 'admin',
