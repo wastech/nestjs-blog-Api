@@ -28,6 +28,7 @@
     "@nestjs/mongoose": "^9.2.2",
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/swagger": "^6.3.0",
     "@types/mongoose-unique-validator": "^1.0.7",
     "bcrypt": "^5.1.0",
     "cache-manager": "^5.2.0",
