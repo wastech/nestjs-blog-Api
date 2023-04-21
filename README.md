@@ -24,8 +24,23 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The Blog API developed with Node.js, NestJS, MongoDB, ExpressJS, Jest, and Helmet is a modern and scalable solution for building a blog system. NestJS, a progressive Node.js framework, provides a robust and modular architecture that allows developers to create highly scalable and maintainable applications.
 
+MongoDB, a popular NoSQL database, is used to store the blog system's data, enabling efficient retrieval and manipulation of large datasets. ExpressJS, a fast and minimalist web framework, provides an easy-to-use API for handling HTTP requests and responses.
+
+Jest, a popular testing framework, is used for writing and running unit tests, ensuring that the API's functionality is thoroughly tested before deployment. Helmet, a middleware for securing HTTP headers, helps protect the API from common web vulnerabilities.
+The use of Jest for testing and Helmet for security ensures that the system is thoroughly tested and protected from common web vulnerabilities.
+
+
+## Author 🚀
+  ```Wastech```
+  
+ ## Technologies
+ - Nodejs
+ - Nestjs
+ - Mongodb
+ - jest
+ - jwt
 ## Installation
 
 ```bash
@@ -58,16 +73,26 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+## Features Implemented
+ - Authentication
+   - Registration
+   - Login
+   - Profile
+   - Update Profile
+   - Update Password
+   - Delete User
+   - Get all User
+   - Get Single User
+ - Blog
+   - Create Post
+   - Get All Post
+   - Get Single Post
+   - Update Post
+   - Delete Post
+   - Get Related Post
+   - Get Post By Category
+   - Upvote Post
+   - DownVote Post
+   - Get User Post
+   - Comment On Post
+   
